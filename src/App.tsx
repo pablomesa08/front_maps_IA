@@ -1,35 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { FormGroup, FormControlLabel, Checkbox, Container } from '@mui/material';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const matches = useMediaQuery('(max-width:600px)');
+  const [selectedCheckbox, setSelectedCheckbox] = useState<string | null>(null);
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name } = event.target;
+    setSelectedCheckbox(selectedCheckbox === name ? null : name);
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Container sx={{ display: 'inline-block', alignItems: 'center', flexDirection: matches ? 'column' : 'row' }}>
+        <div className='info'>
+          <h1 className='tittle'>GEO TRACKER</h1>
+          <img src="/earth.svg" className='im-logo' alt="Logo" />
+        </div>
+        <div>
+          <p className='description'>¡Encontrar una ruta nunca fue tan fácil! Selecciona el mapa la ciudad, origen y destino e iniciemos la magia</p>
+        </div>
+      </Container>
+      <Container>
+        <FormGroup sx={{ alignItems: 'center', flexDirection: 'row', marginLeft: 10, color: 'white' }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedCheckbox === 'medellin'}
+                onChange={handleCheckboxChange}
+                name="medellin"
+                sx={{ 
+                  '& .MuiSvgIcon-root': { fontSize: 32 },
+                  color: 'white',
+                  '&.Mui-checked': { color: 'white' }
+                }}
+              />
+            }
+            label="Medellín"
+            sx={{ 
+              '& .MuiFormControlLabel-label': {
+                fontFamily: 'Russo One',
+                fontSize: '28px',
+              },
+              marginRight: 5
+            }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedCheckbox === 'envigado'}
+                onChange={handleCheckboxChange}
+                name="envigado"
+                sx={{ 
+                  '& .MuiSvgIcon-root': { fontSize: 32 },
+                  color: 'white',
+                  '&.Mui-checked': { color: 'white' }
+                }}
+              />
+            }
+            label="Envigado"
+            sx={{ 
+              '& .MuiFormControlLabel-label': {
+                fontFamily: 'Russo One',
+                fontSize: '28px',
+              }
+            }}
+          />
+        </FormGroup>
+      </Container>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
