@@ -1,30 +1,32 @@
-# React + TypeScript + Vite
+# Geo Tracker
+<p align="center">
+  <img src="public/earth.svg" width="200" alt="Geo Tracker" />
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Descripción
+Geo Tracker es una aplicación que permite visualizar la mejor ruta entre un origen y destino. Se siguen los siguientes pasos:
+1. Se elige la ciudad deseada a examinar: Medellín o Envigado.
+2. Se selecciona el tipo de transporte a utilizar: Carro, Bicicleta o Caminando.
+3. Se ingresa la dirección de origen y destino.
+4. Click al botón "Iniciar" para visualizar la mejor ruta.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.app.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+## Ejecución en desarrollo
+1. Clonar el repositorio.
+2. Moverse a la carpeta del proyecto.
+```
+cd front_maps_IA1
+```
+3. Instalar las dependencias con:
+```
+yarn 
+npm install
+```
+3. Ejecutar la aplicación con:
+```
+yarn dev
+npm run dev
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## Stack Tecnológico
+- Frontend: ReactJS
+
