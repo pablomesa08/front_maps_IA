@@ -368,5 +368,7 @@ export default App;
 const sampleLocations = [
   { lat: 6.165695488417018, lon: -75.56775125876526, name: "Casa de Alejo" },
   { lat: 6.202594397242729, lon: -75.5554366508233, name: "Casa de Dennis" },
+  { lat: 6.235316, lon: -75.562600, name: "Casa de Brayan" },
+  { lat: 6.170132519329542, lon: -75.58990999066384, name: "Casa de Pablo" },
   { lat: 6.169272903825496, lon: -75.54688093511429, name: "Universidad EIA" },
 ];
