@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-//Importacion de componentes
-import { FormGroup, FormControlLabel, Checkbox, Container, Button, ButtonGroup, TextField, Autocomplete, CircularProgress } from '@mui/material';
-//Importacion para el uso de media query
+import React, { useState, useEffect } from 'react';
+// Importacion de componentes
+import { AppBar, Toolbar, Typography, FormGroup, FormControlLabel, Checkbox, Container, Button, ButtonGroup, TextField, Autocomplete, CircularProgress, Grid } from '@mui/material';
+import axios from 'axios';
+// Importacion para el uso de media query
 import useMediaQuery from '@mui/material/useMediaQuery';
-//Importacion de estilos
+// Importacion de estilos
 import './App.css';
 
-//Interfaz para el manejo de las peliculas
-interface Film {
-  title: string;
-  year: number;
+// Interfaz para el manejo de las ubicaciones
+interface Location {
+  lat: number;
+  lon: number;
+  name: string;
 }
 
-//Funcion para simular un tiempo de espera
+// Funcion para simular un tiempo de espera
 function sleepOrigin(duration: number): Promise<void> {
   return new Promise<void>((resolve) => {
     setTimeout(() => {
@@ -21,7 +23,7 @@ function sleepOrigin(duration: number): Promise<void> {
   });
 }
 
-//Funcion para simular un tiempo de espera
+// Funcion para simular un tiempo de espera
 function sleepEnd(duration: number): Promise<void> {
   return new Promise<void>((resolve) => {
     setTimeout(() => {
@@ -31,54 +33,79 @@ function sleepEnd(duration: number): Promise<void> {
 }
 
 function App() {
-  //Variable para el uso de media query
+  // Variable para el uso de media query
   const matches = useMediaQuery('(max-width:600px)');
 
-  //Variables de estado para el manejo de los checkbox 
-  const [selectedCheckbox, setSelectedCheckbox] = useState<string | null>(null);
+  // Variables de estado para el manejo de los checkbox 
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
-  //Variables de estado para el manejo de los botones
-  const [selectedButton, setSelectedButton] = useState<string | null>(null);
+  // Variables de estado para el manejo de los botones
+  const [selectedTransport, setSelectedTransport] = useState<string | null>(null);
 
-  //Variables para manejo de boton de inicio
-  const [start, setStart] = useState<string | null>(null);
+  // Variables de estado para el manejo de origen y destino
+  const [origin, setOrigin] = useState<Location | null>(null);
+  const [destination, setDestination] = useState<Location | null>(null);
 
-  //Funcion para el manejo de los checkbox al hacer click
+  // Variable de estado para el manejo de la imagen del mapa
+  const [mapImage, setMapImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Funcion para el manejo de los checkbox al hacer click
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name } = event.target;
-    setSelectedCheckbox(selectedCheckbox === name ? null : name);
+    setSelectedCity(selectedCity === name ? null : name);
   };
 
-  //Funcion para el manejo de los botones al hacer click
+  // Funcion para el manejo de los botones al hacer click
   const handleButtonClick = (buttonName: string) => {
-    setSelectedButton(selectedButton === buttonName ? null : buttonName);
+    setSelectedTransport(selectedTransport === buttonName ? null : buttonName);
   };
 
-  //Funcion para el manejo del boton de inicio
-  const handleStart = (buttonName: string) => {
-    setStart(start === buttonName ? null : buttonName);
+  // Funcion para iniciar la búsqueda
+  const handleStart = async () => {
+    if (selectedCity && selectedTransport && origin && destination) {
+      setLoading(true);
+      try {
+        const response = await axios.post('http://localhost:8000/render_map_with_data', {
+          city_selected: selectedCity === 'medellin' ? 'Medellín, Antioquia, Colombia' : 'Envigado, Antioquia, Colombia',
+          transport_mode_selected: selectedTransport,
+          init_node: origin,
+          final_node: destination,
+        }, { responseType: 'blob' });
+
+        const imageBlob = response.data;
+        const imageObjectURL = URL.createObjectURL(imageBlob);
+        setMapImage(imageObjectURL);
+      } catch (error) {
+        console.error('Error fetching the map:', error);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      alert('Por favor, completa todos los campos.');
+    }
   };
 
-  //Variables de estado para el manejo de la apertura del origen
-  const [openOrigin, setOpenOrigin] = React.useState(false);
+  // Variables de estado para el manejo de la apertura del origen
+  const [openOrigin, setOpenOrigin] = useState(false);
 
-  //Variables de estado para el manejo de las opciones de origen
-  const [optionsOrigin, setOptionsOrigin] = React.useState<readonly Film[]>([]);
+  // Variables de estado para el manejo de las opciones de origen
+  const [optionsOrigin, setOptionsOrigin] = useState<readonly Location[]>([]);
 
-  //Varible de estado para la carga de la busqueda de origen
+  // Varible de estado para la carga de la busqueda de origen
   const loadingOrigin = openOrigin && optionsOrigin.length === 0;
 
-  //Variables de estado para el manejo de la apertura del origen
-  const [openEnd, setOpenEnd] = React.useState(false);
+  // Variables de estado para el manejo de la apertura del destino
+  const [openEnd, setOpenEnd] = useState(false);
 
-  //Variables de estado para el manejo de las opciones de origen
-  const [optionsEnd, setOptionsEnd] = React.useState<readonly Film[]>([]);
+  // Variables de estado para el manejo de las opciones de destino
+  const [optionsEnd, setOptionsEnd] = useState<readonly Location[]>([]);
 
-  //Varible de estado para la carga de la busqueda de origen
+  // Varible de estado para la carga de la busqueda de destino
   const loadingEnd = openEnd && optionsEnd.length === 0;
 
-  //Funcion para la busqueda de origen
-  React.useEffect(() => {
+  // Funcion para la busqueda de origen
+  useEffect(() => {
     let active = true;
 
     if (!loadingOrigin) {
@@ -86,9 +113,9 @@ function App() {
     }
 
     (async () => {
-      await sleepOrigin(1000); 
+      await sleepOrigin(1000);
       if (active) {
-        setOptionsOrigin([...topFilms]);
+        setOptionsOrigin([...sampleLocations]);
       }
     })();
 
@@ -97,14 +124,14 @@ function App() {
     };
   }, [loadingOrigin]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!openOrigin) {
       setOptionsOrigin([]);
     }
   }, [openOrigin]);
 
-  //Funcion para la busqueda de destino
-  React.useEffect(() => {
+  // Funcion para la busqueda de destino
+  useEffect(() => {
     let active = true;
 
     if (!loadingEnd) {
@@ -112,9 +139,9 @@ function App() {
     }
 
     (async () => {
-      await sleepEnd(1000); 
+      await sleepEnd(1000);
       if (active) {
-        setOptionsEnd([...topFilms]);
+        setOptionsEnd([...sampleLocations]);
       }
     })();
 
@@ -123,7 +150,7 @@ function App() {
     };
   }, [loadingEnd]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!openEnd) {
       setOptionsEnd([]);
     }
@@ -131,86 +158,122 @@ function App() {
 
   return (
     <>
-      {/*Container con el titulo, imagen y descripcion*/}
-      <Container sx={{ display: 'inline-block', alignItems: 'center', justifyContent: 'center', flexDirection: matches ? 'column' : 'row' }}>
+      {/* Navbar */}
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            GEO TRACKER
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* Container con el titulo, imagen y descripcion */}
+      <Container sx={{ marginTop: 5, textAlign: 'center' }}>
         <div className='info'>
-          <h1 className='tittle'>GEO TRACKER</h1>
           <img src="/earth.svg" className='im-logo' alt="Logo" />
-        </div>
-        <div>
-          <p className='description'>¡Encontrar una ruta nunca fue tan fácil! Sigue estos 4 sencillos pasos y observa la magia de viajar</p>
+          <h1 className='title'>GEO TRACKER</h1>
+          <p className='description'>¡Encontrar una ruta nunca fue tan fácil!, sigue estos 4 sencillos pasos y observa la magia de viajar!</p>
         </div>
       </Container>
 
-      {/*Container para los pasos a seguir*/}
-      <Container sx={{marginLeft: 3}}>
-        <div className='general'>
-          {/*Div para pasos 1, 3*/}
-          <div className='second'>
-            <h1 className='step'>1. Selecciona la ciudad a evaluar: </h1>
-            {/*FormGroup para elegir ciudad*/}
-            <FormGroup sx={{ alignItems: 'center', flexDirection: 'row', color: 'white' }}>
+      {/* Grid Container para los pasos a seguir */}
+      <Container sx={{ marginTop: 3 }}>
+        <Grid container spacing={4}>
+          {/* Paso 1 */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h6" className='step'>1. Selecciona la ciudad a evaluar:</Typography>
+            <FormGroup row sx={{ justifyContent: 'center' }}>
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={selectedCheckbox === 'medellin'}
+                    checked={selectedCity === 'medellin'}
                     onChange={handleCheckboxChange}
                     name="medellin"
-                    sx={{ 
-                      '& .MuiSvgIcon-root': { fontSize: 28 },
-                      color: 'white',
-                      '&.Mui-checked': { color: 'white' }
-                    }}
+                    sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, color: '#2c3e50' }}
                   />
                 }
                 label="Medellín"
-                sx={{ 
-                  '& .MuiFormControlLabel-label': {
-                    fontFamily: 'Russo One',
-                    fontSize: '20px',
-                  },
-                  marginRight: 5
-                }}
+                sx={{ '& .MuiFormControlLabel-label': { fontFamily: 'Russo One', fontSize: '20px' } }}
               />
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={selectedCheckbox === 'envigado'}
+                    checked={selectedCity === 'envigado'}
                     onChange={handleCheckboxChange}
                     name="envigado"
-                    sx={{ 
-                      '& .MuiSvgIcon-root': { fontSize: 28 },
-                      color: 'white',
-                      '&.Mui-checked': { color: 'white' }
-                    }}
+                    sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, color: '#2c3e50' }}
                   />
                 }
                 label="Envigado"
-                sx={{ 
-                  '& .MuiFormControlLabel-label': {
-                    fontFamily: 'Russo One',
-                    fontSize: '20px',
-                  }
-                }}
+                sx={{ '& .MuiFormControlLabel-label': { fontFamily: 'Russo One', fontSize: '20px' } }}
               />
             </FormGroup>
-            <h1 className='step'>3. Selecciona origen y destino: </h1>
+          </Grid>
 
-            {/*Autocomplete para seleccionar origen*/}
+          {/* Paso 2 */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h6" className='step'>2. Selecciona tipo de transporte:</Typography>
+            <ButtonGroup variant="contained" aria-label="outlined primary button group" fullWidth>
+              <Button
+                onClick={() => handleButtonClick('walk')}
+                sx={{
+                  fontFamily: 'Russo One',
+                  fontSize: 20,
+                  color: '#ffffff',
+                  backgroundColor: selectedTransport === 'walk' ? '#000000' : 'inherit',
+                  '&:hover': {
+                    backgroundColor: '#000000',
+                  }
+                }}
+              >
+                A pie
+              </Button>
+              <Button
+                onClick={() => handleButtonClick('bike')}
+                sx={{
+                  fontFamily: 'Russo One',
+                  fontSize: 20,
+                  color: '#ffffff',
+                  backgroundColor: selectedTransport === 'bike' ? '#000000' : 'inherit',
+                  '&:hover': {
+                    backgroundColor: '#000000',
+                  }
+                }}
+              >
+                Bicicleta
+              </Button>
+              <Button
+                onClick={() => handleButtonClick('drive')}
+                sx={{
+                  fontFamily: 'Russo One',
+                  fontSize: 20,
+                  color: '#ffffff',
+                  backgroundColor: selectedTransport === 'drive' ? '#000000' : 'inherit',
+                  '&:hover': {
+                    backgroundColor: '#000000',
+                  }
+                }}
+              >
+                Carro
+              </Button>
+            </ButtonGroup>
+
+          </Grid>
+
+          {/* Paso 3 */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h6" className='step'>3. Selecciona origen:</Typography>
             <Autocomplete
-              id="asynchronous-demo"
-              sx={{ width: 300, marginBottom: 3, backgroundColor: 'white' }}
+              id="origin-autocomplete"
+              sx={{ width: '100%', marginBottom: 3, backgroundColor: 'white' }}
               open={openOrigin}
-              onOpen={() => {
-                setOpenOrigin(true);
-              }}
-              onClose={() => {
-                setOpenOrigin(false);
-              }}
-              isOptionEqualToValue={(option, value) => option.title === value.title}
-              getOptionLabel={(option) => option.title}
+              onOpen={() => setOpenOrigin(true)}
+              onClose={() => setOpenOrigin(false)}
+              isOptionEqualToValue={(option, value) => option.lat === value.lat && option.lon === value.lon}
+              getOptionLabel={(option) => option.name}
               options={optionsOrigin}
               loading={loadingOrigin}
+              onChange={(event, value) => setOrigin(value)}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -224,28 +287,26 @@ function App() {
                       </React.Fragment>
                     ),
                   }}
-                  sx={{
-                    '& .MuiInputLabel-root': { color: 'black', fontFamily: 'Russo One', fontSize: 16 },
-                  }}
+                  sx={{ '& .MuiInputLabel-root': { color: 'black', fontFamily: 'Russo One', fontSize: 16 } }}
                 />
               )}
             />
+          </Grid>
 
-            {/*Autocomplete para seleccionar destino*/}
+          {/* Paso 4 */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h6" className='step'>4. Selecciona destino:</Typography>
             <Autocomplete
-              id="asynchronous-demo"
-              sx={{ width: 300, backgroundColor: 'white' }}
+              id="destination-autocomplete"
+              sx={{ width: '100%', backgroundColor: 'white' }}
               open={openEnd}
-              onOpen={() => {
-                setOpenEnd(true);
-              }}
-              onClose={() => {
-                setOpenEnd(false);
-              }}
-              isOptionEqualToValue={(option, value) => option.title === value.title}
-              getOptionLabel={(option) => option.title}
+              onOpen={() => setOpenEnd(true)}
+              onClose={() => setOpenEnd(false)}
+              isOptionEqualToValue={(option, value) => option.lat === value.lat && option.lon === value.lon}
+              getOptionLabel={(option) => option.name}
               options={optionsEnd}
               loading={loadingEnd}
+              onChange={(event, value) => setDestination(value)}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -254,127 +315,58 @@ function App() {
                     ...params.InputProps,
                     endAdornment: (
                       <React.Fragment>
-                        {loadingEnd ? <CircularProgress color="primary" size={20} /> : null}
+                        {loadingEnd ? <CircularProgress color="inherit" size={20} /> : null}
                         {params.InputProps.endAdornment}
                       </React.Fragment>
                     ),
                   }}
-                  sx={{
-                    '& .MuiInputLabel-root': { color: 'black', fontFamily: 'Russo One', fontSize: 16 },
-                  }}
+                  sx={{ '& .MuiInputLabel-root': { color: 'black', fontFamily: 'Russo One', fontSize: 16 } }}
                 />
               )}
             />
-          </div>
-          {/*Div para pasos 2 y 4*/}
-          <div>
-            <h1 className='step'>2. Selecciona tipo de transporte: </h1>
+          </Grid>
 
-            {/*ButtonGroup para seleccionar tipo de transporte*/}
-            <ButtonGroup variant="contained" aria-label="outlined primary button group">
-              <Button
-                onClick={() => handleButtonClick('aPie')} 
-                sx={{ 
-                  fontFamily: 'Russo One', 
-                  fontSize: 20, 
-                  color: 'white',
-                  backgroundColor: selectedButton === 'aPie' ? 'black' : 'default',
-                }}
-                >
-                  A pie</Button>
-              <Button
-                onClick={() => handleButtonClick('bicicleta')} 
-                sx={{ 
-                  fontFamily: 'Russo One', 
-                  fontSize: 20, 
-                  color: 'white',
-                  backgroundColor: selectedButton === 'bicicleta' ? 'black' : 'default',
-                }}
-                >Bicicleta</Button>
-              <Button
-                onClick={() => handleButtonClick('carro')} 
-              sx={{ 
-                fontFamily: 'Russo One', 
-                fontSize: 20, 
-                color: 'white',
-                backgroundColor: selectedButton === 'carro' ? 'black' : 'default', 
-              }}
-              >Carro</Button>
-            </ButtonGroup>
-            <h1 className='step'>4. Vamos a buscar: </h1>
-
-            {/*Button para iniciar la busqueda*/}
-            <Button 
-              onClick={() => handleStart('iniciar')} 
-              variant="contained" 
-              size='large'
-              sx={{
-                fontFamily: 'Russo One',
-                fontSize: 20,
-                color: 'white',
-                backgroundColor: start === 'iniciar' ? 'black' : 'default',
-              }}
+          {/* Botón de búsqueda */}
+          <Grid item xs={12}>
+            <Button
+              onClick={handleStart}
+              variant="contained"
+              size="large"
+              sx={{ fontFamily: 'Russo One', fontSize: 20, color: 'white', backgroundColor: '#2980b9' }}
+              fullWidth
             >
-              INICIAR</Button>
-          </div>
-          {/*Div para la imagen */}
-          <div className='im-con'>
-            <img src="/earth.svg" className='im' alt="mapa" />
-          </div>
-        </div>
+              INICIAR
+            </Button>
+          </Grid>
+
+          {/* Imagen del mapa */}
+          <Grid item xs={12} className='im-con'>
+            {loading ? (
+              <CircularProgress size={50} />
+            ) : (
+              mapImage && <img src={mapImage} className='im' alt="mapa" />
+            )}
+          </Grid>
+        </Grid>
       </Container>
+
+      {/* Footer */}
+      <footer className='footer'>
+        <Container>
+          <Typography variant="body1" align="center">
+            © 2024 GEO TRACKER. Todos los derechos reservados.
+          </Typography>
+        </Container>
+      </footer>
     </>
   );
 }
+
 export default App;
 
-//Diccionario de peliculas
-const topFilms = [
-  { title: 'The Shawshank Redemption', year: 1994 },
-  { title: 'The Godfather', year: 1972 },
-  { title: 'The Godfather: Part II', year: 1974 },
-  { title: 'The Dark Knight', year: 2008 },
-  { title: '12 Angry Men', year: 1957 },
-  { title: "Schindler's List", year: 1993 },
-  { title: 'Pulp Fiction', year: 1994 },
-  {
-    title: 'The Lord of the Rings: The Return of the King',
-    year: 2003,
-  },
-  { title: 'The Good, the Bad and the Ugly', year: 1966 },
-  { title: 'Fight Club', year: 1999 },
-  {
-    title: 'The Lord of the Rings: The Fellowship of the Ring',
-    year: 2001,
-  },
-  {
-    title: 'Star Wars: Episode V - The Empire Strikes Back',
-    year: 1980,
-  },
-  { title: 'Forrest Gump', year: 1994 },
-  { title: 'Inception', year: 2010 },
-  {
-    title: 'The Lord of the Rings: The Two Towers',
-    year: 2002,
-  },
-  { title: "One Flew Over the Cuckoo's Nest", year: 1975 },
-  { title: 'Goodfellas', year: 1990 },
-  { title: 'The Matrix', year: 1999 },
-  { title: 'Seven Samurai', year: 1954 },
-  {
-    title: 'Star Wars: Episode IV - A New Hope',
-    year: 1977,
-  },
-  { title: 'City of God', year: 2002 },
-  { title: 'Se7en', year: 1995 },
-  { title: 'The Silence of the Lambs', year: 1991 },
-  { title: "It's a Wonderful Life", year: 1946 },
-  { title: 'Life Is Beautiful', year: 1997 },
-  { title: 'The Usual Suspects', year: 1995 },
-  { title: 'Léon: The Professional', year: 1994 },
-  { title: 'Spirited Away', year: 2001 },
-  { title: 'Saving Private Ryan', year: 1998 },
-  { title: 'Once Upon a Time in the West', year: 1968 },
-  { title: 'American History X', year: 1998 },
-  { title: 'Interstellar', year: 2014 },
+// Diccionario de ubicaciones de ejemplo
+const sampleLocations = [
+  { lat: 6.165695488417018, lon: -75.56775125876526, name: "Casa de Alejo" },
+  { lat: 6.202594397242729, lon: -75.5554366508233, name: "Casa de Dennis" },
+  { lat: 6.169272903825496, lon: -75.54688093511429, name: "Universidad EIA" },
 ];
