@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, FormGroup, FormControlLabel, Checkbox, Container, Button, ButtonGroup, TextField, Autocomplete, CircularProgress, Grid } from '@mui/material';
 import axios from 'axios';
 // Importacion para el uso de media query
-import useMediaQuery from '@mui/material/useMediaQuery';
+//import useMediaQuery from '@mui/material/useMediaQuery';
 // Importacion de estilos
 import './App.css';
 
@@ -34,7 +34,7 @@ function sleepEnd(duration: number): Promise<void> {
 
 function App() {
   // Variable para el uso de media query
-  const matches = useMediaQuery('(max-width:600px)');
+  //const matches = useMediaQuery('(max-width:600px)');
 
   // Variables de estado para el manejo de los checkbox 
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
@@ -159,7 +159,7 @@ function App() {
   return (
     <>
       {/* Navbar */}
-      <AppBar position="static">
+      <AppBar position="static" sx= {{backgroundColor: '#000000'}}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             GEO TRACKER
