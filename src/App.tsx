@@ -39,8 +39,6 @@ function App() {
   // Variables de estado para el manejo de los checkbox 
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
-  // Variables de estado para el manejo de los botones
-  const [selectedTransport, setSelectedTransport] = useState<string | null>(null);
 
   // Variables de estado para el manejo de origen y destino
   const [origin, setOrigin] = useState<Location | null>(null);
@@ -56,19 +54,13 @@ function App() {
     setSelectedCity(selectedCity === name ? null : name);
   };
 
-  // Funcion para el manejo de los botones al hacer click
-  const handleButtonClick = (buttonName: string) => {
-    setSelectedTransport(selectedTransport === buttonName ? null : buttonName);
-  };
-
   // Funcion para iniciar la búsqueda
   const handleStart = async () => {
-    if (selectedCity && selectedTransport && origin && destination) {
+    if (selectedCity && origin && destination) {
       setLoading(true);
       try {
         const response = await axios.post('http://localhost:8000/render_map_with_data', {
           city_selected: selectedCity === 'medellin' ? 'Medellín, Antioquia, Colombia' : 'Envigado, Antioquia, Colombia',
-          transport_mode_selected: selectedTransport,
           init_node: origin,
           final_node: destination,
         }, { responseType: 'blob' });
@@ -186,18 +178,6 @@ function App() {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={selectedCity === 'medellin'}
-                    onChange={handleCheckboxChange}
-                    name="medellin"
-                    sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, color: '#2c3e50' }}
-                  />
-                }
-                label="Medellín"
-                sx={{ '& .MuiFormControlLabel-label': { fontFamily: 'Russo One', fontSize: '20px' } }}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
                     checked={selectedCity === 'envigado'}
                     onChange={handleCheckboxChange}
                     name="envigado"
@@ -212,57 +192,21 @@ function App() {
 
           {/* Paso 2 */}
           <Grid item xs={12} md={6}>
-            <Typography variant="h6" className='step'>2. Selecciona tipo de transporte:</Typography>
-            <ButtonGroup variant="contained" aria-label="outlined primary button group" fullWidth>
-              <Button
-                onClick={() => handleButtonClick('walk')}
-                sx={{
-                  fontFamily: 'Russo One',
-                  fontSize: 20,
-                  color: '#ffffff',
-                  backgroundColor: selectedTransport === 'walk' ? '#000000' : 'inherit',
-                  '&:hover': {
-                    backgroundColor: '#000000',
-                  }
-                }}
-              >
-                A pie
-              </Button>
-              <Button
-                onClick={() => handleButtonClick('bike')}
-                sx={{
-                  fontFamily: 'Russo One',
-                  fontSize: 20,
-                  color: '#ffffff',
-                  backgroundColor: selectedTransport === 'bike' ? '#000000' : 'inherit',
-                  '&:hover': {
-                    backgroundColor: '#000000',
-                  }
-                }}
-              >
-                Bicicleta
-              </Button>
-              <Button
-                onClick={() => handleButtonClick('drive')}
-                sx={{
-                  fontFamily: 'Russo One',
-                  fontSize: 20,
-                  color: '#ffffff',
-                  backgroundColor: selectedTransport === 'drive' ? '#000000' : 'inherit',
-                  '&:hover': {
-                    backgroundColor: '#000000',
-                  }
-                }}
-              >
-                Carro
-              </Button>
-            </ButtonGroup>
-
+            <Typography variant="h6" className='step'>4. Comience la ejecución:</Typography>
+            <Button
+              onClick={handleStart}
+              variant="contained"
+              size="large"
+              sx={{ fontFamily: 'Russo One', fontSize: 20, color: 'white', backgroundColor: '#2980b9' }}
+              fullWidth
+            >
+              INICIAR
+            </Button>
           </Grid>
 
           {/* Paso 3 */}
           <Grid item xs={12} md={6}>
-            <Typography variant="h6" className='step'>3. Selecciona origen:</Typography>
+            <Typography variant="h6" className='step'>2. Selecciona origen:</Typography>
             <Autocomplete
               id="origin-autocomplete"
               sx={{ width: '100%', marginBottom: 3, backgroundColor: 'white' }}
@@ -295,7 +239,7 @@ function App() {
 
           {/* Paso 4 */}
           <Grid item xs={12} md={6}>
-            <Typography variant="h6" className='step'>4. Selecciona destino:</Typography>
+            <Typography variant="h6" className='step'>3. Selecciona destino:</Typography>
             <Autocomplete
               id="destination-autocomplete"
               sx={{ width: '100%', backgroundColor: 'white' }}
@@ -324,19 +268,6 @@ function App() {
                 />
               )}
             />
-          </Grid>
-
-          {/* Botón de búsqueda */}
-          <Grid item xs={12}>
-            <Button
-              onClick={handleStart}
-              variant="contained"
-              size="large"
-              sx={{ fontFamily: 'Russo One', fontSize: 20, color: 'white', backgroundColor: '#2980b9' }}
-              fullWidth
-            >
-              INICIAR
-            </Button>
           </Grid>
 
           {/* Imagen del mapa */}
