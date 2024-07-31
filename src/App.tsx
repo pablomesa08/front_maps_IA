@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // Importacion de componentes
-import { AppBar, Toolbar, Typography, FormGroup, FormControlLabel, Checkbox, Container, Button, ButtonGroup, TextField, Autocomplete, CircularProgress, Grid } from '@mui/material';
+import { AppBar, Toolbar, Typography, FormGroup, FormControlLabel, Checkbox, Container, Button, TextField, Autocomplete, CircularProgress, Grid } from '@mui/material';
 import axios from 'axios';
 // Importacion para el uso de media query
 //import useMediaQuery from '@mui/material/useMediaQuery';
@@ -301,5 +301,5 @@ const sampleLocations = [
   { lat: 6.202594397242729, lon: -75.5554366508233, name: "Casa de Dennis" },
   { lat: 6.235316, lon: -75.562600, name: "Casa de Brayan" },
   { lat: 6.170132519329542, lon: -75.58990999066384, name: "Casa de Pablo" },
-  { lat: 6.169272903825496, lon: -75.54688093511429, name: "Universidad EIA" },
+  { lat: 6.15696005, lon: -75.51685480358233, name: "Universidad EIA" },
 ];
